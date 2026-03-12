@@ -18,8 +18,8 @@ El sistema también aplica **normalización del texto**, para mejorar la coincid
 
 # Ejemplo inicial en inglés
 text_input = st.text_area(
-    "Escribe tus documentos (uno por línea, en inglés):",
-    "The dog barks loudly.\nThe cat meows at night.\nThe dog and the cat play together."
+    "Escribe tus documentos (uno por línea):",
+    "El perro ladra fuerte en el parque.\nEl gato maúlla durante la noche.\nEl perro y el gato juegan juntos en el jardín."
 )
 
 question = st.text_input("Escribe una pregunta (en inglés):", "Who is playing?")
