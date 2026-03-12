@@ -1,99 +1,69 @@
 import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import pandas as pd
-import re
-from nltk.stem import SnowballStemmer
 
-st.title("🔎 Buscador Inteligente con TF-IDF")
+st.set_page_config(page_title="Buscador Inteligente de Textos", page_icon="🔎", layout="wide")
+
+st.title("🔎 Buscador Inteligente de Información")
 
 st.write("""
-Cada línea se trata como un **documento** (puede ser una frase, un párrafo o un texto más largo).  
-✍️ Escribe los documentos en **español** y luego formula una **pregunta relacionada** con esos textos.
+Esta herramienta permite **buscar información dentro de varios textos** usando técnicas de análisis de lenguaje natural.
 
-La aplicación analiza las palabras del texto usando **TF-IDF**, lo que permite identificar qué documentos son más relevantes para responder la pregunta.
-
-El sistema también aplica **normalización del texto**, para mejorar la coincidencia entre las palabras de la pregunta y los documentos.
+📌 **¿Cómo funciona?**  
+1. Escribe varios textos o frases en el cuadro de documentos.  
+2. Cada línea se interpreta como un **documento independiente**.  
+3. Luego escribe una **pregunta o consulta**.  
+4. El sistema comparará tu pregunta con los documentos y mostrará **el más relacionado**.
 """)
 
-# Ejemplo inicial en inglés
-text_input = st.text_area(
-    "Escribe tus documentos (uno por línea):",
-    "El perro ladra fuerte en el parque.\nEl gato maúlla durante la noche.\nEl perro y el gato juegan juntos en el jardín."
-)
+col1, col2 = st.columns([2,1])
 
-question = st.text_input("Escribe una pregunta (en inglés):", "Who is playing?")
+with col1:
 
-# Inicializar stemmer para inglés
-stemmer = SnowballStemmer("english")
+    text_input = st.text_area(
+        "📄 Base de textos para analizar (uno por línea):",
+        "Los estudiantes estudian programación en la universidad.\n"
+        "La inteligencia artificial ayuda a resolver problemas complejos.\n"
+        "El ejercicio físico mejora la salud y el bienestar.\n"
+        "La música puede cambiar el estado de ánimo de las personas.\n"
+        "Los viajes permiten conocer nuevas culturas."
+    )
 
-def tokenize_and_stem(text: str):
-    # Pasar a minúsculas
-    text = text.lower()
-    # Eliminar caracteres no alfabéticos
-    text = re.sub(r'[^a-z\s]', ' ', text)
-    # Tokenizar (palabras con longitud > 1)
-    tokens = [t for t in text.split() if len(t) > 1]
-    # Aplicar stemming
-    stems = [stemmer.stem(t) for t in tokens]
-    return stems
+    question = st.text_input("💬 Escribe una consulta sobre los textos:")
 
-if st.button("Calcular TF-IDF y buscar respuesta"):
-    documents = [d.strip() for d in text_input.split("\n") if d.strip()]
-    if len(documents) < 1:
-        st.warning("⚠️ Ingresa al menos un documento.")
-    else:
-        # Vectorizador con stemming
-        vectorizer = TfidfVectorizer(
-            tokenizer=tokenize_and_stem,
-            stop_words="english",
-            token_pattern=None
-        )
+    if st.button("⚡ Buscar información"):
 
-        # Ajustar con documentos
-        X = vectorizer.fit_transform(documents)
+        if text_input.strip() == "" or question.strip() == "":
+            st.warning("Por favor escribe algunos textos y una consulta.")
+        else:
 
-        # Mostrar matriz TF-IDF
-        df_tfidf = pd.DataFrame(
-            X.toarray(),
-            columns=vectorizer.get_feature_names_out(),
-            index=[f"Doc {i+1}" for i in range(len(documents))]
-        )
+            documents = text_input.split("\n")
 
-        st.write("### Matriz TF-IDF (stems)")
-        st.dataframe(df_tfidf.round(3))
+            vectorizer = TfidfVectorizer()
+            tfidf_matrix = vectorizer.fit_transform(documents + [question])
 
-        # Vector de la pregunta
-        question_vec = vectorizer.transform([question])
+            similarity = cosine_similarity(
+                tfidf_matrix[-1],
+                tfidf_matrix[:-1]
+            )
 
-        # Similitud coseno
-        similarities = cosine_similarity(question_vec, X).flatten()
+            best_match_index = similarity.argmax()
+            best_document = documents[best_match_index]
+            score = similarity[0][best_match_index]
 
-        # Documento más parecido
-        best_idx = similarities.argmax()
-        best_doc = documents[best_idx]
-        best_score = similarities[best_idx]
+            st.subheader("📊 Resultado del análisis")
 
-        st.write("### Pregunta y respuesta")
-        st.write(f"**Tu pregunta:** {question}")
-        st.write(f"**Documento más relevante (Doc {best_idx+1}):** {best_doc}")
-        st.write(f"**Puntaje de similitud:** {best_score:.3f}")
+            st.write("El texto más relacionado con tu consulta es:")
 
-        # Mostrar todas las similitudes
-        sim_df = pd.DataFrame({
-            "Documento": [f"Doc {i+1}" for i in range(len(documents))],
-            "Texto": documents,
-            "Similitud": similarities
-        })
-        st.write("### Puntajes de similitud (ordenados)")
-        st.dataframe(sim_df.sort_values("Similitud", ascending=False))
+            st.success(best_document)
 
-        # Mostrar coincidencias de stems
-        vocab = vectorizer.get_feature_names_out()
-        q_stems = tokenize_and_stem(question)
-        matched = [s for s in q_stems if s in vocab and df_tfidf.iloc[best_idx].get(s, 0) > 0]
-        st.write("### Stems de la pregunta presentes en el documento elegido:", matched)
+            st.write(f"Nivel de coincidencia: **{score:.2f}**")
 
+with col2:
 
+    st.subheader("💡 Ejemplos de consultas")
 
-
+    st.write("¿Qué ayuda a resolver problemas complejos?")
+    st.write("¿Qué actividad mejora la salud?")
+    st.write("¿Qué puede cambiar el estado de ánimo?")
+    st.write("¿Para qué sirven los viajes?")
