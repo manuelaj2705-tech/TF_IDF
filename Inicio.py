@@ -59,11 +59,19 @@ with col1:
 
             st.write(f"Nivel de coincidencia: **{score:.2f}**")
 
+
 with col2:
 
     st.subheader("💡 Ejemplos de consultas")
 
-    st.write("¿Qué ayuda a resolver problemas complejos?")
-    st.write("¿Qué actividad mejora la salud?")
-    st.write("¿Qué puede cambiar el estado de ánimo?")
-    st.write("¿Para qué sirven los viajes?")
+    if st.button("¿Qué ayuda a resolver problemas complejos?"):
+        st.session_state.pregunta = "¿Qué ayuda a resolver problemas complejos?"
+
+    if st.button("¿Qué actividad mejora la salud?"):
+        st.session_state.pregunta = "¿Qué actividad mejora la salud?"
+
+    if st.button("¿Qué puede cambiar el estado de ánimo?"):
+        st.session_state.pregunta = "¿Qué puede cambiar el estado de ánimo?"
+
+    if st.button("¿Para qué sirven los viajes?"):
+        st.session_state.pregunta = "¿Para qué sirven los viajes?"
