@@ -9,9 +9,11 @@ st.title("🔎 Buscador Inteligente con TF-IDF")
 
 st.write("""
 Cada línea se trata como un **documento** (puede ser una frase, un párrafo o un texto más largo).  
-⚠️ Los documentos y las preguntas deben estar en **inglés**, ya que el análisis está configurado para ese idioma.  
+✍️ Escribe los documentos en **español** y luego formula una **pregunta relacionada** con esos textos.
 
-La aplicación aplica normalización y *stemming* para que palabras como *playing* y *play* se consideren equivalentes.
+La aplicación analiza las palabras del texto usando **TF-IDF**, lo que permite identificar qué documentos son más relevantes para responder la pregunta.
+
+El sistema también aplica **normalización del texto**, para mejorar la coincidencia entre las palabras de la pregunta y los documentos.
 """)
 
 # Ejemplo inicial en inglés
